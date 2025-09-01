@@ -1,21 +1,14 @@
-# Use Node.js as the base image
+# Use official Node.js image
 FROM node:18
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copy everything into the container
+COPY . .
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the backend code
-COPY . .
-
-# Expose port 5000 to the host
-EXPOSE 5000
-
 # Start the server
-CMD ["node", "src/index.js"]
- 
+CMD ["node", "server.js"]
