@@ -3,10 +3,12 @@ import { db } from '../db.js';
 
 const router = express.Router();
 
+// Debug route to confirm mounting
 router.get('/ping', (req, res) => {
   res.json({ message: 'Auth route is alive' });
 });
 
+// Login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
