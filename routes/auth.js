@@ -3,11 +3,12 @@ import { db } from '../db.js';
 
 const router = express.Router();
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
 router.get('/ping', (req, res) => {
   res.json({ message: 'Auth route is alive' });
 });
+
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
   try {
     await db.read();
