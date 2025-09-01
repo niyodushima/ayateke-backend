@@ -25,7 +25,7 @@ app.use(express.json());
 
     app.use('/api/attendance', attendanceRoutes);
     app.use('/api/leaves', leaveRoutes);
-    app.use('/api', authRoutes); // ✅ This mounts /api/login
+    app.use('/api', authRoutes); // ✅ mounts /api/login
     app.use('/api/staff', staffRoutes);
     app.use('/api/salaries', salaryRoutes);
     app.use('/uploads', express.static('uploads'));
