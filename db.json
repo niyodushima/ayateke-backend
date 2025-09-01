@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "email": "admin@ayateke.com",
+      "password": "admin123",
+      "role": "admin"
+    },
+    {
+      "email": "staff@ayateke.com",
+      "password": "staff123",
+      "role": "staff"
+    }
+  ],
+  "leaveRequests": []
+}
