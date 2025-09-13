@@ -48,4 +48,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+// 📅 GET: Today's attendance logs
+router.get('/today', async (req, res) => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  try {
+    const logs = await Attendance.getLogs({ date: today });
+    res.json(logs);
+  } catch (err) {
+    console.error('❌ Error fetching today\'s logs:', err.message);
+    res.status(500).json({ error: 'Failed to retrieve today\'s attendance logs' });
+  }
+});
+
 export default router;
