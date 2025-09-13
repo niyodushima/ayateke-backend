@@ -2,6 +2,32 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { db, initDB } from './db.js';
+import express from 'express';
+import cors from 'cors';
+
+const app = express();
+
+// Allow production + local
+const allowedOrigins = new Set([
+  process.env.FRONTEND_ORIGIN || 'https://ayateke-frontend.vercel.app',
+  'http://localhost:3000',
+]);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow Postman/cURL
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true, // set true only if you use cookies/auth headers
+}));
+
+// Preflight support
+app.options('*', cors());
+
+// Parsers and the rest
+app.use(express.json());
 
 // Routes
 import authRoutes from './routes/auth.js';
