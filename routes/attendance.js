@@ -4,7 +4,7 @@ import Attendance from '../models/attendance.js';
 
 const router = express.Router();
 
-// 🧹 Validation middleware
+// 🧹 Validation middleware for adding logs
 const validateAttendance = [
   body('employee_id').notEmpty().withMessage('Employee ID is required'),
   body('date').isISO8601().withMessage('Date must be in YYYY-MM-DD format'),
@@ -55,8 +55,31 @@ router.get('/today', async (req, res) => {
     const logs = await Attendance.getLogs({ date: today });
     res.json(logs);
   } catch (err) {
-    console.error('❌ Error fetching today\'s logs:', err.message);
-    res.status(500).json({ error: 'Failed to retrieve today\'s attendance logs' });
+    console.error("❌ Error fetching today's logs:", err.message);
+    res.status(500).json({ error: "Failed to retrieve today's attendance logs" });
+  }
+});
+
+// 🔄 PUT: Check-out (update existing record's clock_out)
+router.put('/checkout', async (req, res) => {
+  const { employee_id, date, clock_out } = req.body || {};
+
+  if (!employee_id || !date || !clock_out) {
+    return res.status(400).json({ error: 'employee_id, date, and clock_out are required' });
+  }
+
+  try {
+    const updated = await Attendance.updateClockOut({ employee_id, date, clock_out });
+    if (!updated) {
+      return res.status(404).json({ error: 'No matching attendance record found for check-out' });
+    }
+    res.json({
+      message: '✅ Checked out successfully',
+      data: updated,
+    });
+  } catch (err) {
+    console.error('❌ Error during check-out:', err.message);
+    res.status(500).json({ error: 'Failed to update attendance log' });
   }
 });
 
