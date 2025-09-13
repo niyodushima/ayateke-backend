@@ -9,12 +9,14 @@ import attendanceRoutes from './routes/attendance.js';
 import leaveRoutes from './routes/leave.js';
 import staffRoutes from './routes/staff.js';
 import salaryRoutes from './routes/salaries.js';
+import branchesRouter from './routes/branches.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use('/api/branches', branchesRouter);
 // ✅ CORS: allow both local dev and Vercel frontend
 app.use(cors({
   origin: [
