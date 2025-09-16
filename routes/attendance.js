@@ -35,12 +35,12 @@ router.post('/', validateAttendance, async (req, res) => {
   }
 });
 
-// 📤 GET: Fetch all logs (optionally filter by employee or date)
+// 📤 GET: Fetch logs (filter by employee or date)
 router.get('/', async (req, res) => {
-  const { employee_id, date } = req.query;
+  const { employee_id, date, start, end } = req.query;
 
   try {
-    const logs = await Attendance.getLogs({ employee_id, date });
+    const logs = await Attendance.getLogs({ employee_id, date, start, end });
     res.json(logs);
   } catch (err) {
     console.error('❌ Error fetching logs:', err.message);
@@ -48,9 +48,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 📅 GET: Today's attendance logs
+// 📅 GET: Today's attendance logs (timezone-aware)
 router.get('/today', async (req, res) => {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Kigali' }); // YYYY-MM-DD
+
   try {
     const logs = await Attendance.getLogs({ date: today });
     res.json(logs);
@@ -60,7 +61,7 @@ router.get('/today', async (req, res) => {
   }
 });
 
-// 🔄 PUT: Check-out (update existing record's clock_out)
+// 🔄 PUT: Check-out (update clock_out)
 router.put('/checkout', async (req, res) => {
   const { employee_id, date, clock_out } = req.body || {};
 
