@@ -15,6 +15,7 @@ const validateAttendance = [
     .withMessage('Clock Out must be in HH:MM format'),
 ];
 
+// ✅ Original check-in route
 router.post('/', validateAttendance, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -28,6 +29,47 @@ router.post('/', validateAttendance, async (req, res) => {
   }
 });
 
+// ✅ Add POST /checkin to match frontend
+router.post('/checkin', async (req, res) => {
+  const { employee_id, date, clock_in } = req.body || {};
+  if (!employee_id || !date || !clock_in) {
+    return res.status(400).json({ error: 'Missing required fields for check-in' });
+  }
+
+  try {
+    const newLog = await Attendance.addLog({
+      employee_id,
+      date,
+      clock_in,
+      clock_out: '00:00',
+    });
+    res.status(201).json({ message: '✅ Checked in successfully', data: newLog });
+  } catch (err) {
+    console.error('❌ Error during check-in:', err.message);
+    res.status(500).json({ error: 'Failed to check in' });
+  }
+});
+
+// ✅ Add POST /checkout to match frontend
+router.post('/checkout', async (req, res) => {
+  const { employee_id, date, clock_out } = req.body || {};
+  if (!employee_id || !date || !clock_out) {
+    return res.status(400).json({ error: 'Missing required fields for check-out' });
+  }
+
+  try {
+    const updated = await Attendance.updateClockOut({ employee_id, date, clock_out });
+    if (!updated) {
+      return res.status(404).json({ error: 'No matching record found for check-out' });
+    }
+    res.status(200).json({ message: '✅ Checked out successfully', data: updated });
+  } catch (err) {
+    console.error('❌ Error during check-out:', err.message);
+    res.status(500).json({ error: 'Failed to check out' });
+  }
+});
+
+// ✅ Fetch logs
 router.get('/', async (req, res) => {
   const { employee_id, date, start, end } = req.query;
 
@@ -40,6 +82,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ✅ Today's logs
 router.get('/today', async (req, res) => {
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Kigali' });
 
@@ -52,6 +95,7 @@ router.get('/today', async (req, res) => {
   }
 });
 
+// ✅ Original PUT /checkout (still supported)
 router.put('/checkout', async (req, res) => {
   const { employee_id, date, clock_out } = req.body || {};
 
