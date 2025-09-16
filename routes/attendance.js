@@ -35,13 +35,13 @@ router.post('/', validateAttendance, async (req, res) => {
   }
 });
 
-// 📤 GET: Fetch logs (filter by employee or date)
+// 📤 GET: Fetch logs (filter by employee or date range)
 router.get('/', async (req, res) => {
   const { employee_id, date, start, end } = req.query;
 
   try {
     const logs = await Attendance.getLogs({ employee_id, date, start, end });
-    res.json(logs);
+    res.status(200).json(Array.isArray(logs) ? logs : []);
   } catch (err) {
     console.error('❌ Error fetching logs:', err.message);
     res.status(500).json({ error: 'Failed to retrieve attendance logs' });
@@ -54,7 +54,7 @@ router.get('/today', async (req, res) => {
 
   try {
     const logs = await Attendance.getLogs({ date: today });
-    res.json(logs);
+    res.status(200).json(Array.isArray(logs) ? logs : []);
   } catch (err) {
     console.error("❌ Error fetching today's logs:", err.message);
     res.status(500).json({ error: "Failed to retrieve today's attendance logs" });
@@ -66,15 +66,19 @@ router.put('/checkout', async (req, res) => {
   const { employee_id, date, clock_out } = req.body || {};
 
   if (!employee_id || !date || !clock_out) {
-    return res.status(400).json({ error: 'employee_id, date, and clock_out are required' });
+    return res.status(400).json({
+      error: 'Missing required fields: employee_id, date, and clock_out',
+    });
   }
 
   try {
     const updated = await Attendance.updateClockOut({ employee_id, date, clock_out });
     if (!updated) {
-      return res.status(404).json({ error: 'No matching attendance record found for check-out' });
+      return res.status(404).json({
+        error: 'No matching attendance record found for check-out',
+      });
     }
-    res.json({
+    res.status(200).json({
       message: '✅ Checked out successfully',
       data: updated,
     });
