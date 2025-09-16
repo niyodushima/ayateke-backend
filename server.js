@@ -7,9 +7,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ CORS setup
+// ✅ CORS setup — allow Vercel + localhost
 const allowedOrigins = [
-  process.env.FRONTEND_ORIGIN || 'https://ayateke-frontend.vercel.app',
+  'https://ayateke-frontend.vercel.app',
   'http://localhost:3000',
 ];
 
@@ -22,7 +22,10 @@ app.use(cors({
   credentials: true,
 }));
 
+// ✅ Preflight support
 app.options('*', cors());
+
+// ✅ Parse JSON bodies
 app.use(express.json());
 
 // ✅ Import routes
