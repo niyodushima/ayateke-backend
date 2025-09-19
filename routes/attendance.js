@@ -1,9 +1,10 @@
 import express from 'express';
-import { body, validationResult } from 'express-validator';
 import Attendance from '../models/attendance.js';
 
 const router = express.Router();
 
+// ✅ POST /api/attendance — original route with full validation
+import { body, validationResult } from 'express-validator';
 const validateAttendance = [
   body('employee_id').notEmpty().withMessage('Employee ID is required'),
   body('date').isISO8601().withMessage('Date must be in YYYY-MM-DD format'),
@@ -15,7 +16,6 @@ const validateAttendance = [
     .withMessage('Clock Out must be in HH:MM format'),
 ];
 
-// ✅ Original check-in route
 router.post('/', validateAttendance, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -29,9 +29,13 @@ router.post('/', validateAttendance, async (req, res) => {
   }
 });
 
-// ✅ Add POST /checkin to match frontend
+// ✅ POST /api/attendance/checkin — matches frontend
 router.post('/checkin', async (req, res) => {
   const { employee_id, date, clock_in } = req.body || {};
+  const clock_out = '00:00';
+
+  console.log('📥 Check-in received:', { employee_id, date, clock_in, clock_out });
+
   if (!employee_id || !date || !clock_in) {
     return res.status(400).json({ error: 'Missing required fields for check-in' });
   }
@@ -41,7 +45,7 @@ router.post('/checkin', async (req, res) => {
       employee_id,
       date,
       clock_in,
-      clock_out: '00:00',
+      clock_out,
     });
     res.status(201).json({ message: '✅ Checked in successfully', data: newLog });
   } catch (err) {
@@ -50,9 +54,12 @@ router.post('/checkin', async (req, res) => {
   }
 });
 
-// ✅ Add POST /checkout to match frontend
+// ✅ POST /api/attendance/checkout — matches frontend
 router.post('/checkout', async (req, res) => {
   const { employee_id, date, clock_out } = req.body || {};
+
+  console.log('📥 Check-out received:', { employee_id, date, clock_out });
+
   if (!employee_id || !date || !clock_out) {
     return res.status(400).json({ error: 'Missing required fields for check-out' });
   }
@@ -69,7 +76,7 @@ router.post('/checkout', async (req, res) => {
   }
 });
 
-// ✅ Fetch logs
+// ✅ GET /api/attendance — fetch logs
 router.get('/', async (req, res) => {
   const { employee_id, date, start, end } = req.query;
 
@@ -82,7 +89,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ✅ Today's logs
+// ✅ GET /api/attendance/today — fetch today's logs
 router.get('/today', async (req, res) => {
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Kigali' });
 
@@ -95,7 +102,7 @@ router.get('/today', async (req, res) => {
   }
 });
 
-// ✅ Original PUT /checkout (still supported)
+// ✅ PUT /api/attendance/checkout — legacy support
 router.put('/checkout', async (req, res) => {
   const { employee_id, date, clock_out } = req.body || {};
 
