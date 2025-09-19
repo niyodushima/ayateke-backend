@@ -1,4 +1,3 @@
-// backend/models/attendance.js
 import { db } from '../db.js'; // ✅ lowdb named export
 
 const Attendance = {
@@ -10,7 +9,6 @@ const Attendance = {
       await db.read();
       let logs = db.data.attendance_logs || [];
 
-      // Optional filters
       if (employee_id) {
         logs = logs.filter((r) => r.employee_id === employee_id);
       }
@@ -36,7 +34,7 @@ const Attendance = {
       db.data.attendance_logs ||= [];
 
       const newLog = {
-        id: Date.now(), // simple unique ID
+        id: Date.now(),
         employee_id,
         date,
         clock_in,
@@ -55,7 +53,7 @@ const Attendance = {
   },
 
   /**
-   * Update clock_out for an existing record
+   * Update clock_out for an existing record with clock_out === '00:00'
    */
   async updateClockOut({ employee_id, date, clock_out }) {
     try {
@@ -63,11 +61,15 @@ const Attendance = {
       db.data.attendance_logs ||= [];
 
       const record = db.data.attendance_logs.find(
-        (r) => r.employee_id === employee_id && r.date === date
+        (r) =>
+          r.employee_id === employee_id &&
+          r.date === date &&
+          r.clock_out === '00:00'
       );
 
       if (!record) {
-        return null; // No matching record found
+        console.warn('⚠️ No matching check-in found for checkout');
+        return null;
       }
 
       record.clock_out = clock_out;
