@@ -53,19 +53,23 @@ const Attendance = {
   },
 
   /**
-   * Update clock_out for an existing record with clock_out === '00:00'
+   * Update clock_out for the most recent record with clock_out === '00:00'
    */
   async updateClockOut({ employee_id, date, clock_out }) {
     try {
       await db.read();
       db.data.attendance_logs ||= [];
 
-      const record = db.data.attendance_logs.find(
-        (r) =>
-          r.employee_id === employee_id &&
-          r.date === date &&
-          r.clock_out === '00:00'
-      );
+      const candidates = db.data.attendance_logs
+        .filter(
+          (r) =>
+            r.employee_id === employee_id &&
+            r.date === date &&
+            r.clock_out === '00:00'
+        )
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      const record = candidates[0]; // most recent check-in
 
       if (!record) {
         console.warn('⚠️ No matching check-in found for checkout');
