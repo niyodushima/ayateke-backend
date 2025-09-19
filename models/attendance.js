@@ -26,12 +26,23 @@ const Attendance = {
   },
 
   /**
-   * Add a new attendance log
+   * Add a new attendance log — prevents duplicate check-in
    */
   async addLog({ employee_id, date, clock_in, clock_out }) {
     try {
       await db.read();
       db.data.attendance_logs ||= [];
+
+      const alreadyCheckedIn = db.data.attendance_logs.some(
+        (r) =>
+          r.employee_id === employee_id &&
+          r.date === date &&
+          r.clock_out === '00:00'
+      );
+
+      if (alreadyCheckedIn) {
+        throw new Error('Already checked in today');
+      }
 
       const newLog = {
         id: Date.now(),
@@ -45,9 +56,10 @@ const Attendance = {
       db.data.attendance_logs.push(newLog);
       await db.write();
 
+      console.log('✅ Check-in saved:', newLog);
       return newLog;
     } catch (err) {
-      console.error('Error adding log:', err);
+      console.error('Error adding log:', err.message);
       throw err;
     }
   },
@@ -69,7 +81,7 @@ const Attendance = {
         )
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-      const record = candidates[0]; // most recent check-in
+      const record = candidates[0];
 
       if (!record) {
         console.warn('⚠️ No matching check-in found for checkout');
@@ -79,9 +91,10 @@ const Attendance = {
       record.clock_out = clock_out;
       await db.write();
 
+      console.log('✅ Check-out updated:', record);
       return record;
     } catch (err) {
-      console.error('Error updating clock_out:', err);
+      console.error('Error updating clock_out:', err.message);
       throw err;
     }
   },
