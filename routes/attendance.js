@@ -124,6 +124,6 @@ router.put('/checkout', async (req, res) => {
     console.error('❌ Error during check-out:', err.message);
     res.status(500).json({ error: 'Failed to update attendance log' });
   }
-});
+}); 
 
 export default router;
