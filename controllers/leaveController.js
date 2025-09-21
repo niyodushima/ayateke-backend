@@ -2,18 +2,27 @@ import { db } from '../db.js';
 
 const leaveController = {
   // 📥 Submit a new leave request
-  async submitLeave({ employee_id, type, start_date, end_date, reason }) {
+  async submitLeave({ employee_id, type, start_date, end_date, reason, submitted_by }) {
     await db.read();
 
     const newLeave = {
-      id: Date.now().toString(), // unique ID
+      id: Date.now().toString(),
       employee_id,
       type,
       start_date,
       end_date,
       reason: reason || '',
       status: 'pending',
-      created_at: new Date().toISOString()
+      submitted_by,
+      created_at: new Date().toISOString(),
+      status_history: [
+        {
+          status: 'pending',
+          changed_by: submitted_by,
+          changed_at: new Date().toISOString(),
+        },
+      ],
+      deleted: false,
     };
 
     db.data.leaveRequests ||= [];
@@ -23,10 +32,13 @@ const leaveController = {
     return newLeave;
   },
 
-  // 📤 Get leave requests with optional filters
-  async getLeaves({ employee_id, status }) {
+  // 📤 Get leave requests with optional filters + pagination
+  async getLeaves({ employee_id, status, page = 1, limit = 10 }) {
     await db.read();
     let leaves = db.data.leaveRequests || [];
+
+    // Filter out soft-deleted records
+    leaves = leaves.filter(l => !l.deleted);
 
     if (employee_id) {
       leaves = leaves.filter(l => l.employee_id === employee_id);
@@ -36,35 +48,52 @@ const leaveController = {
       leaves = leaves.filter(l => l.status.toLowerCase() === status.toLowerCase());
     }
 
-    // Optional: sort by created_at descending
+    // Sort by created_at descending
     leaves.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-    return leaves;
+    // Apply pagination
+    const startIndex = (page - 1) * limit;
+    const paginated = leaves.slice(startIndex, startIndex + limit);
+
+    return {
+      total: leaves.length,
+      page,
+      limit,
+      data: paginated,
+    };
   },
 
-  // ✅ Update leave status
-  async updateLeaveStatus(id, status) {
+  // ✅ Update leave status with history
+  async updateLeaveStatus(id, status, changed_by) {
     await db.read();
-    const leave = db.data.leaveRequests.find(l => l.id === id);
+    const leave = db.data.leaveRequests.find(l => l.id === id && !l.deleted);
     if (!leave) return null;
 
     leave.status = status.toLowerCase();
-    await db.write();
+    leave.status_history ||= [];
+    leave.status_history.push({
+      status: leave.status,
+      changed_by,
+      changed_at: new Date().toISOString(),
+    });
 
+    await db.write();
     return leave;
   },
 
-  // 🗑️ Delete a leave request
-  async deleteLeave(id) {
+  // 🗑️ Soft delete a leave request
+  async softDeleteLeave(id, deleted_by) {
     await db.read();
-    const index = db.data.leaveRequests.findIndex(l => l.id === id);
-    if (index === -1) return null;
+    const leave = db.data.leaveRequests.find(l => l.id === id && !l.deleted);
+    if (!leave) return null;
 
-    const [deleted] = db.data.leaveRequests.splice(index, 1);
+    leave.deleted = true;
+    leave.deleted_by = deleted_by;
+    leave.deleted_at = new Date().toISOString();
+
     await db.write();
-
-    return deleted;
-  }
+    return leave;
+  },
 };
 
 export default leaveController;
