@@ -1,35 +1,39 @@
 import express from 'express';
-import multer from 'multer';
-import pool from '../db.js';
-import path from 'path';
+import { body, validationResult } from 'express-validator';
+import contractController from '../controllers/contractController.js';
 
 const router = express.Router();
 
-// Configure multer
-const storage = multer.diskStorage({
-  destination: 'uploads/contracts/',
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
-  },
-});
-const upload = multer({ storage });
+// 📥 POST: Add a new contract
+router.post(
+  '/',
+  [
+    body('employee_id').notEmpty(),
+    body('type').isIn(['permanent', 'temporary', 'intern']).withMessage('Invalid contract type'),
+    body('start_date').isISO8601(),
+    body('end_date').isISO8601(),
+    body('signed_by').notEmpty(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-// POST /api/contracts/upload
-router.post('/upload', upload.single('contract'), async (req, res) => {
-  const { staff_id, start_date, end_date } = req.body;
-  const file_url = `/uploads/contracts/${req.file.filename}`;
+    try {
+      const contract = await contractController.addContract(req.body);
+      res.status(201).json({ message: 'Contract added', data: contract });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to add contract' });
+    }
+  }
+);
 
+// 📤 GET: Retrieve contracts
+router.get('/', async (req, res) => {
   try {
-    await pool.query(
-      `INSERT INTO contracts (staff_id, start_date, end_date, file_url, status)
-       VALUES ($1, $2, $3, $4, 'Active')`,
-      [staff_id, start_date, end_date, file_url]
-    );
-    res.json({ message: 'Contract uploaded successfully' });
+    const contracts = await contractController.getContracts(req.query);
+    res.json(contracts);
   } catch (err) {
-    console.error('Upload error:', err);
-    res.status(500).json({ error: 'Failed to upload contract' });
+    res.status(500).json({ error: 'Failed to fetch contracts' });
   }
 });
 
