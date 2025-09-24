@@ -36,6 +36,7 @@ import staffRoutes from './routes/staff.js';
 import salaryRoutes from './routes/salaries.js';
 import branchesRouter from './routes/branches.js';
 import contractRoutes from './routes/contracts.js';
+import staffRoutes from './routes/staff.js';
 
 // ✅ Mount routes
 app.use('/api', authRoutes);
@@ -45,6 +46,7 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/salaries', salaryRoutes);
 app.use('/api/branches', branchesRouter);
 app.use('/api/contracts', contractRoutes);
+app.use('/api/staff', staffRoutes);
 
 // ✅ Serve static files
 app.use('/uploads', express.static('uploads'));
