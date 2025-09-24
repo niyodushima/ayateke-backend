@@ -1,4 +1,3 @@
-// backend/db.js
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 
@@ -9,7 +8,68 @@ const defaultData = {
     { email: 'staff@ayateke.com', password: 'staff123', role: 'staff' }
   ],
   leaveRequests: [],
-  attendance_logs: []
+  attendance_logs: [],
+  staff: [
+    {
+      id: '101',
+      name: 'Alice Uwimana',
+      email: 'alice@ayateke.com',
+      branch: 'Kigali',
+      role: 'HR Manager',
+      status: 'active'
+    },
+    {
+      id: '102',
+      name: 'Jean Bosco',
+      email: 'jean@ayateke.com',
+      branch: 'Huye',
+      role: 'Technician',
+      status: 'active'
+    },
+    {
+      id: '103',
+      name: 'Claudine Niyonsaba',
+      email: 'claudine@ayateke.com',
+      branch: 'Musanze',
+      role: 'Finance Officer',
+      status: 'inactive'
+    }
+  ],
+  contracts: [
+    {
+      employee_id: 'alice@ayateke.com',
+      type: 'permanent',
+      start_date: '2023-01-01',
+      end_date: '2026-01-01',
+      signed_by: 'CEO'
+    }
+  ],
+  attendance: [
+    {
+      employee_id: 'alice@ayateke.com',
+      date: '2025-09-23',
+      status: 'Present'
+    },
+    {
+      employee_id: 'alice@ayateke.com',
+      date: '2025-09-24',
+      status: 'Absent'
+    }
+  ],
+  salaries: [
+    {
+      employee_id: 'alice@ayateke.com',
+      month: 'August',
+      year: '2025',
+      amount: 850000
+    },
+    {
+      employee_id: 'alice@ayateke.com',
+      month: 'September',
+      year: '2025',
+      amount: 850000
+    }
+  ]
 };
 
 const db = new Low(adapter, defaultData);
