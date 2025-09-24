@@ -1,19 +1,24 @@
-// routes/staff.js
 import express from 'express';
-import { db } from '../db.js'; // ✅ Correct named import
+import { db } from '../db.js';
 
 const router = express.Router();
 
-// GET /api/staff
+// 📤 GET: List all staff with optional filters
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT id, name, role, department FROM staff ORDER BY name ASC'
-    );
-    res.json(result.rows);
+    await db.read();
+    let staff = db.data.staff || [];
+
+    const { branch, role, status } = req.query;
+
+    if (branch) staff = staff.filter(s => s.branch === branch);
+    if (role) staff = staff.filter(s => s.role === role);
+    if (status) staff = staff.filter(s => s.status === status);
+
+    res.json(staff);
   } catch (err) {
-    console.error('Error fetching staff:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching staff:', err.message);
+    res.status(500).json({ error: 'Failed to fetch staff' });
   }
 });
 
