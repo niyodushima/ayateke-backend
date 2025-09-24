@@ -22,4 +22,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+// 📥 GET: Single staff profile by ID
+router.get('/:id', async (req, res) => {
+  try {
+    await db.read();
+    const staff = db.data.staff || [];
+    const person = staff.find(s => s.id === req.params.id);
+    if (!person) return res.status(404).json({ error: 'Staff not found' });
+    res.json(person);
+  } catch (err) {
+    console.error('Error fetching staff profile:', err.message);
+    res.status(500).json({ error: 'Failed to fetch staff profile' });
+  }
+});
+
 export default router;
