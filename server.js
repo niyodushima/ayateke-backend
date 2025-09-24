@@ -32,7 +32,6 @@ app.use(express.json());
 import authRoutes from './routes/auth.js';
 import attendanceRoutes from './routes/attendance.js';
 import leaveRoutes from './routes/leave.js';
-import staffRoutes from './routes/staff.js';
 import salaryRoutes from './routes/salaries.js';
 import branchesRouter from './routes/branches.js';
 import contractRoutes from './routes/contracts.js';
