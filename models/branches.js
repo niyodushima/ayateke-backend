@@ -97,12 +97,19 @@ const Branches = {
     if (!branch) throw new Error('Branch not found');
 
     const entry = { id: uid() };
+
     if (tableName === 'staff') {
-      if (!payload?.role) throw new Error('Role is required');
+      if (!payload?.role) {
+        console.error('Missing role in payload:', payload);
+        throw new Error('Role is required');
+      }
       entry.role = payload.role;
       entry.name = payload?.name || '';
     } else {
-      if (!payload?.name) throw new Error('Name is required');
+      if (!payload?.name) {
+        console.error('Missing name in payload:', payload);
+        throw new Error('Name is required');
+      }
       entry.name = payload.name;
     }
 
