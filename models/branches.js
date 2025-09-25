@@ -1,21 +1,26 @@
-// backend/models/branches.js
 import { db } from '../db.js';
 
-const VALID_BRANCHES = ['Gatsibo', 'Kirehe', 'Kigali'];
+const VALID_BRANCHES = [
+  'Head Office',
+  'Kirehe Branch',
+  'Gatsibo Branch',
+  'Mahama Water Treatment Plant'
+];
+
 const VALID_TABLES = ['staff', 'schemeManagers', 'plumbers'];
 
 function ensureDbShape() {
   db.data ||= {};
   db.data.branches ||= [];
-  // Ensure all expected branches exist
+
   for (const b of VALID_BRANCHES) {
     const existing = db.data.branches.find((x) => x.branch === b);
     if (!existing) {
       db.data.branches.push({
         branch: b,
-        staff: [],           // entries: { id, role, name }
-        schemeManagers: [],  // entries: { id, name }
-        plumbers: [],        // entries: { id, name }
+        staff: [],
+        schemeManagers: [],
+        plumbers: []
       });
     }
   }
@@ -26,7 +31,6 @@ function uid() {
 }
 
 const Branches = {
-  // Initialize with empty structure (idempotent)
   async init() {
     await db.read();
     ensureDbShape();
@@ -34,17 +38,21 @@ const Branches = {
     return db.data.branches;
   },
 
-  // Optional: seed predefined staff roles with blank names
   async seedStaffRoles() {
     await db.read();
     ensureDbShape();
 
     const roles = [
-      'Branch Manager',
       'Managing Director',
-      'Human Resource',
-      'Director Administrative of Finance',
-      'Accountant',
+      'Permanent Secretary',
+      'Director of Finance',
+      'Logistician',
+      'Chief Accountant',
+      'Water Engineer',
+      'Pump Operator',
+      'Driver',
+      'Technician',
+      'HR Manager'
     ];
 
     for (const branch of db.data.branches) {
@@ -54,7 +62,7 @@ const Branches = {
           branch.staff.push({
             id: uid(),
             role,
-            name: '', // fill later
+            name: ''
           });
         }
       }
@@ -77,12 +85,8 @@ const Branches = {
   },
 
   async addEntry(branchName, tableName, payload) {
-    if (!VALID_BRANCHES.includes(branchName)) {
-      throw new Error('Invalid branch');
-    }
-    if (!VALID_TABLES.includes(tableName)) {
-      throw new Error('Invalid table name');
-    }
+    if (!VALID_BRANCHES.includes(branchName)) throw new Error('Invalid branch');
+    if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
@@ -92,12 +96,10 @@ const Branches = {
 
     const entry = { id: uid() };
     if (tableName === 'staff') {
-      // Expect { role, name }
       if (!payload?.role) throw new Error('Role is required');
       entry.role = payload.role;
       entry.name = payload?.name || '';
     } else {
-      // Expect { name }
       if (!payload?.name) throw new Error('Name is required');
       entry.name = payload.name;
     }
@@ -108,12 +110,8 @@ const Branches = {
   },
 
   async updateEntry(branchName, tableName, entryId, payload) {
-    if (!VALID_BRANCHES.includes(branchName)) {
-      throw new Error('Invalid branch');
-    }
-    if (!VALID_TABLES.includes(tableName)) {
-      throw new Error('Invalid table name');
-    }
+    if (!VALID_BRANCHES.includes(branchName)) throw new Error('Invalid branch');
+    if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
@@ -137,12 +135,8 @@ const Branches = {
   },
 
   async deleteEntry(branchName, tableName, entryId) {
-    if (!VALID_BRANCHES.includes(branchName)) {
-      throw new Error('Invalid branch');
-    }
-    if (!VALID_TABLES.includes(tableName)) {
-      throw new Error('Invalid table name');
-    }
+    if (!VALID_BRANCHES.includes(branchName)) throw new Error('Invalid branch');
+    if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
@@ -157,7 +151,7 @@ const Branches = {
     const [removed] = list.splice(idx, 1);
     await db.write();
     return removed;
-  },
+  }
 };
 
 export default Branches;
