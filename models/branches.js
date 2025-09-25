@@ -81,17 +81,19 @@ const Branches = {
   async get(branchName) {
     await db.read();
     ensureDbShape();
-    return db.data.branches.find((b) => b.branch === branchName) || null;
+    const decoded = decodeURIComponent(branchName);
+    return db.data.branches.find((b) => b.branch === decoded) || null;
   },
 
   async addEntry(branchName, tableName, payload) {
-    if (!VALID_BRANCHES.includes(branchName)) throw new Error('Invalid branch');
+    const decoded = decodeURIComponent(branchName);
+    if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
     if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
 
-    const branch = db.data.branches.find((b) => b.branch === branchName);
+    const branch = db.data.branches.find((b) => b.branch === decoded);
     if (!branch) throw new Error('Branch not found');
 
     const entry = { id: uid() };
@@ -110,13 +112,14 @@ const Branches = {
   },
 
   async updateEntry(branchName, tableName, entryId, payload) {
-    if (!VALID_BRANCHES.includes(branchName)) throw new Error('Invalid branch');
+    const decoded = decodeURIComponent(branchName);
+    if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
     if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
 
-    const branch = db.data.branches.find((b) => b.branch === branchName);
+    const branch = db.data.branches.find((b) => b.branch === decoded);
     if (!branch) throw new Error('Branch not found');
 
     const list = branch[tableName];
@@ -135,13 +138,14 @@ const Branches = {
   },
 
   async deleteEntry(branchName, tableName, entryId) {
-    if (!VALID_BRANCHES.includes(branchName)) throw new Error('Invalid branch');
+    const decoded = decodeURIComponent(branchName);
+    if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
     if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
 
-    const branch = db.data.branches.find((b) => b.branch === branchName);
+    const branch = db.data.branches.find((b) => b.branch === decoded);
     if (!branch) throw new Error('Branch not found');
 
     const list = branch[tableName];
