@@ -14,7 +14,8 @@ const defaultData = {
       id: '101',
       name: 'Alice Uwimana',
       email: 'alice@ayateke.com',
-      branch: 'Kigali',
+      branch: 'Head Office',
+      department: 'HR',
       role: 'HR Manager',
       status: 'active'
     },
@@ -22,16 +23,18 @@ const defaultData = {
       id: '102',
       name: 'Jean Bosco',
       email: 'jean@ayateke.com',
-      branch: 'Huye',
-      role: 'Technician',
+      branch: 'Mahama Water Treatment Plant',
+      department: 'Engineering',
+      role: 'Water Engineer',
       status: 'active'
     },
     {
       id: '103',
       name: 'Claudine Niyonsaba',
       email: 'claudine@ayateke.com',
-      branch: 'Musanze',
-      role: 'Finance Officer',
+      branch: 'Kirehe Branch',
+      department: 'Field Operations',
+      role: 'Technician',
       status: 'inactive'
     }
   ],
@@ -68,6 +71,28 @@ const defaultData = {
       month: 'September',
       year: '2025',
       amount: 850000
+    }
+  ],
+  branches: [
+    {
+      id: 'HO',
+      name: 'Head Office',
+      departments: ['Management', 'Finance', 'Logistics', 'HR', 'Procurement', 'IT']
+    },
+    {
+      id: 'KIR',
+      name: 'Kirehe Branch',
+      departments: ['Field Operations', 'Community Liaison', 'Transport']
+    },
+    {
+      id: 'GAT',
+      name: 'Gatsibo Branch',
+      departments: ['Field Operations', 'Community Liaison', 'Transport']
+    },
+    {
+      id: 'MAH',
+      name: 'Mahama Water Treatment Plant',
+      departments: ['Water Treatment', 'Engineering', 'Pump Operations', 'Transport', 'Maintenance']
     }
   ]
 };
