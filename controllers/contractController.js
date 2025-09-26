@@ -14,6 +14,7 @@ const contractController = {
       signed_by,
       status: 'active',
       created_at: new Date().toISOString(),
+      education: '', // Optional: can be filled later
     };
 
     db.data.contracts.push(newContract);
@@ -25,10 +26,23 @@ const contractController = {
     await db.read();
     let contracts = db.data.contracts || [];
 
-    if (employee_id) contracts = contracts.filter(c => c.employee_id === employee_id);
-    if (type) contracts = contracts.filter(c => c.type === type);
+    if (employee_id) {
+      contracts = contracts.filter(c => c.employee_id === employee_id);
+    }
 
-    return contracts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    if (type) {
+      contracts = contracts.filter(c => c.type === type);
+    }
+
+    // ✅ Return only relevant fields for HR
+    return contracts
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .map(c => ({
+        employee_id: c.employee_id,
+        start_date: c.start_date,
+        end_date: c.end_date,
+        education: c.education || 'Not provided',
+      }));
   },
 };
 
