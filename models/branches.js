@@ -16,10 +16,70 @@ function ensureDbShape() {
   db.data.branches ||= [];
 
   const roleMap = {
-    'Head Office': [/* roles unchanged */],
-    'Kirehe Branch': [/* roles unchanged */],
-    'Gatsibo Branch': [/* roles unchanged */],
-    'Mahama Water Treatment Plant': [/* roles unchanged */]
+    'Head Office': [
+      'Managing Director',
+      'Permanent Secretary',
+      'Director of Finance and Administration',
+      'Logistician and Store Keeper',
+      'Chief Accountant',
+      'Human Resource Officer',
+      'Internal Auditor',
+      'Tax Officer',
+      'IT Officer',
+      'Chief Driver',
+      'Accountant',
+      'Electromechanician',
+      'Assistant Chief Driver',
+      'Driver',
+      'Cleaner'
+    ],
+    'Kirehe Branch': [
+      'Branch Manager',
+      'Head of Technical Team',
+      'Chief Recovery Officer',
+      'Field Inspection Officer',
+      'Electromechanician',
+      'Accountant',
+      'Recovery Officer',
+      'Store Keeper and Cashier',
+      'Scheme Manager & Driver',
+      'Scheme Manager',
+      'Pump Operator',
+      'Plumber & Driver',
+      'Plumber',
+      'Plumber Assistant',
+      'Chlorine Mixer',
+      'Driver Vehicle',
+      'Driver Moto',
+      'Cleaner',
+      'Security Guard'
+    ],
+    'Gatsibo Branch': [
+      'Branch Manager',
+      'Head of Technical Team',
+      'Billing and Recovery Monitor',
+      'Scheme Manager & Driver',
+      'Scheme Manager',
+      'Plumber & Driver',
+      'Plumber',
+      'Pump Operator',
+      'Driver Vehicle',
+      'Driver Moto',
+      'Security Guard',
+      'Cleaner'
+    ],
+    'Mahama Water Treatment Plant': [
+      'Water Treatment Plant Manager',
+      'Water Supply Engineer',
+      'Accountant',
+      'Electromechanician',
+      'Water Quality Engineer',
+      'Electromechanic Engineer',
+      'Assistant Electromechanician',
+      'Pump Operator',
+      'Driver Vehicle',
+      'Laboratory Operator'
+    ]
   };
 
   for (const branchName of VALID_BRANCHES) {
@@ -40,28 +100,27 @@ function ensureDbShape() {
   }
 }
 
-const Branches = {
-  async init() {
-    await db.read();
-    ensureDbShape();
-    await db.write();
-    return db.data.branches;
-  },
+async function init() {
+  await db.read();
+  ensureDbShape();
+  await db.write();
+  return db.data.branches;
+}
 
-  async list() {
-    await db.read();
-    ensureDbShape();
-    return db.data.branches;
-  },
+async function list() {
+  await db.read();
+  ensureDbShape();
+  return db.data.branches;
+}
 
-  async get(branchName) {
-    await db.read();
-    ensureDbShape();
-    const decoded = decodeURIComponent(branchName);
-    return db.data.branches.find((b) => b.branch === decoded) || null;
-  },
+async function get(branchName) {
+  await db.read();
+  ensureDbShape();
+  const decoded = decodeURIComponent(branchName);
+  return db.data.branches.find((b) => b.branch === decoded) || null;
+}
 
-  async addRole(branchName, payload) {
+async function addRole(branchName, payload) {
   const decoded = decodeURIComponent(branchName);
   if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
 
@@ -74,7 +133,7 @@ const Branches = {
 
   let existing = branch.roles.find((r) => r.role === payload.role);
 
-  // ✅ If role doesn't exist, create it dynamically
+  // ✅ Create role dynamically if missing
   if (!existing) {
     existing = {
       id: uid(),
@@ -87,7 +146,6 @@ const Branches = {
     branch.roles.push(existing);
   }
 
-  // ✅ Assign staff info
   existing.name = payload.name || '';
   existing.email = payload.email || '';
   existing.tel = payload.tel || '';
@@ -97,59 +155,68 @@ const Branches = {
   return existing;
 }
 
-  async updateRole(branchName, entryId, payload) {
-    const decoded = decodeURIComponent(branchName);
-    if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
+async function updateRole(branchName, entryId, payload) {
+  const decoded = decodeURIComponent(branchName);
+  if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
 
-    await db.read();
-    ensureDbShape();
+  await db.read();
+  ensureDbShape();
 
-    const branch = db.data.branches.find((b) => b.branch === decoded);
-    if (!branch) throw new Error('Branch not found');
+  const branch = db.data.branches.find((b) => b.branch === decoded);
+  if (!branch) throw new Error('Branch not found');
 
-    const idx = branch.roles.findIndex((x) => x.id === entryId);
-    if (idx === -1) throw new Error('Entry not found');
+  const idx = branch.roles.findIndex((x) => x.id === entryId);
+  if (idx === -1) throw new Error('Entry not found');
 
-    if (payload?.role !== undefined) branch.roles[idx].role = payload.role;
-    if (payload?.name !== undefined) branch.roles[idx].name = payload.name;
-    if (payload?.email !== undefined) branch.roles[idx].email = payload.email;
-    if (payload?.tel !== undefined) branch.roles[idx].tel = payload.tel;
-    if (payload?.address !== undefined) branch.roles[idx].address = payload.address;
+  if (payload?.role !== undefined) branch.roles[idx].role = payload.role;
+  if (payload?.name !== undefined) branch.roles[idx].name = payload.name;
+  if (payload?.email !== undefined) branch.roles[idx].email = payload.email;
+  if (payload?.tel !== undefined) branch.roles[idx].tel = payload.tel;
+  if (payload?.address !== undefined) branch.roles[idx].address = payload.address;
 
-    await db.write();
-    return branch.roles[idx];
-  },
+  await db.write();
+  return branch.roles[idx];
+}
 
-  async deleteRole(branchName, entryId) {
-    const decoded = decodeURIComponent(branchName);
-    if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
+async function deleteRole(branchName, entryId) {
+  const decoded = decodeURIComponent(branchName);
+  if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
 
-    await db.read();
-    ensureDbShape();
+  await db.read();
+  ensureDbShape();
 
-    const branch = db.data.branches.find((b) => b.branch === decoded);
-    if (!branch) throw new Error('Branch not found');
+  const branch = db.data.branches.find((b) => b.branch === decoded);
+  if (!branch) throw new Error('Branch not found');
 
-    const idx = branch.roles.findIndex((x) => x.id === entryId);
-    if (idx === -1) throw new Error('Entry not found');
+  const idx = branch.roles.findIndex((x) => x.id === entryId);
+  if (idx === -1) throw new Error('Entry not found');
 
-    const [removed] = branch.roles.splice(idx, 1);
-    await db.write();
-    return removed;
-  },
+  const [removed] = branch.roles.splice(idx, 1);
+  await db.write();
+  return removed;
+}
 
-  async getUnassignedRoles(branchName) {
-    const decoded = decodeURIComponent(branchName);
-    if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
+async function getUnassignedRoles(branchName) {
+  const decoded = decodeURIComponent(branchName);
+  if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
 
-    await db.read();
-    ensureDbShape();
+  await db.read();
+  ensureDbShape();
 
-    const branch = db.data.branches.find((b) => b.branch === decoded);
-    if (!branch) throw new Error('Branch not found');
+  const branch = db.data.branches.find((b) => b.branch === decoded);
+  if (!branch) throw new Error('Branch not found');
 
-    return branch.roles.filter((r) => !r.name || r.name.trim() === '');
-  }
+  return branch.roles.filter((r) => !r.name || r.name.trim() === '');
+}
+
+const Branches = {
+  init,
+  list,
+  get,
+  addRole,
+  updateRole,
+  deleteRole,
+  getUnassignedRoles
 };
 
 export default Branches;
