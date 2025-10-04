@@ -7,40 +7,13 @@ const VALID_BRANCHES = [
   'Mahama Water Treatment Plant'
 ];
 
-const VALID_TABLES = ['staff', 'schemeManagers', 'plumbers'];
-
-function ensureDbShape() {
-  db.data ||= {};
-  db.data.branches ||= [];
-
-  for (const b of VALID_BRANCHES) {
-    const existing = db.data.branches.find((x) => x.branch === b);
-    if (!existing) {
-      db.data.branches.push({
-        branch: b,
-        staff: [],
-        schemeManagers: [],
-        plumbers: []
-      });
-    }
-  }
-}
-
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-const Branches = {
-  async init() {
-    await db.read();
-    ensureDbShape();
-    await db.write();
-    return db.data.branches;
-  },
-
-async seedStaffRoles() {
-  await db.read();
-  ensureDbShape();
+function ensureDbShape() {
+  db.data ||= {};
+  db.data.branches ||= [];
 
   const roleMap = {
     'Head Office': [
@@ -109,24 +82,28 @@ async seedStaffRoles() {
     ]
   };
 
-  for (const branch of db.data.branches) {
-    const roles = roleMap[branch.branch] || [];
-    for (const role of roles) {
-      const exists = branch.staff.some((s) => s.role === role);
-      if (!exists) {
-        branch.staff.push({
+  for (const branchName of VALID_BRANCHES) {
+    const existing = db.data.branches.find((b) => b.branch === branchName);
+    if (!existing) {
+      db.data.branches.push({
+        branch: branchName,
+        roles: roleMap[branchName].map((role) => ({
           id: uid(),
           role,
           name: ''
-        });
-      }
+        }))
+      });
     }
   }
-
-  await db.write();
-  return db.data.branches;
 }
 
+const Branches = {
+  async init() {
+    await db.read();
+    ensureDbShape();
+    await db.write();
+    return db.data.branches;
+  },
 
   async list() {
     await db.read();
@@ -141,10 +118,9 @@ async seedStaffRoles() {
     return db.data.branches.find((b) => b.branch === decoded) || null;
   },
 
-  async addEntry(branchName, tableName, payload) {
+  async addRole(branchName, payload) {
     const decoded = decodeURIComponent(branchName);
     if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
-    if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
@@ -152,32 +128,22 @@ async seedStaffRoles() {
     const branch = db.data.branches.find((b) => b.branch === decoded);
     if (!branch) throw new Error('Branch not found');
 
-    const entry = { id: uid() };
+    if (!payload?.role) throw new Error('Role is required');
 
-    if (tableName === 'staff') {
-      if (!payload?.role) {
-        console.error('Missing role in payload:', payload);
-        throw new Error('Role is required');
-      }
-      entry.role = payload.role;
-      entry.name = payload?.name || '';
-    } else {
-      if (!payload?.name) {
-        console.error('Missing name in payload:', payload);
-        throw new Error('Name is required');
-      }
-      entry.name = payload.name;
-    }
+    const entry = {
+      id: uid(),
+      role: payload.role,
+      name: payload.name || ''
+    };
 
-    branch[tableName].push(entry);
+    branch.roles.push(entry);
     await db.write();
     return entry;
   },
 
-  async updateEntry(branchName, tableName, entryId, payload) {
+  async updateRole(branchName, entryId, payload) {
     const decoded = decodeURIComponent(branchName);
     if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
-    if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
@@ -185,25 +151,19 @@ async seedStaffRoles() {
     const branch = db.data.branches.find((b) => b.branch === decoded);
     if (!branch) throw new Error('Branch not found');
 
-    const list = branch[tableName];
-    const idx = list.findIndex((x) => x.id === entryId);
+    const idx = branch.roles.findIndex((x) => x.id === entryId);
     if (idx === -1) throw new Error('Entry not found');
 
-    if (tableName === 'staff') {
-      if (payload?.role !== undefined) list[idx].role = payload.role;
-      if (payload?.name !== undefined) list[idx].name = payload.name;
-    } else {
-      if (payload?.name !== undefined) list[idx].name = payload.name;
-    }
+    if (payload?.role !== undefined) branch.roles[idx].role = payload.role;
+    if (payload?.name !== undefined) branch.roles[idx].name = payload.name;
 
     await db.write();
-    return list[idx];
+    return branch.roles[idx];
   },
 
-  async deleteEntry(branchName, tableName, entryId) {
+  async deleteRole(branchName, entryId) {
     const decoded = decodeURIComponent(branchName);
     if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
-    if (!VALID_TABLES.includes(tableName)) throw new Error('Invalid table name');
 
     await db.read();
     ensureDbShape();
@@ -211,14 +171,13 @@ async seedStaffRoles() {
     const branch = db.data.branches.find((b) => b.branch === decoded);
     if (!branch) throw new Error('Branch not found');
 
-    const list = branch[tableName];
-    const idx = list.findIndex((x) => x.id === entryId);
+    const idx = branch.roles.findIndex((x) => x.id === entryId);
     if (idx === -1) throw new Error('Entry not found');
 
-    const [removed] = list.splice(idx, 1);
+    const [removed] = branch.roles.splice(idx, 1);
     await db.write();
     return removed;
   }
 };
- 
+
 export default Branches;
