@@ -1,11 +1,10 @@
 import express from 'express';
-import { body } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import Branches from '../models/branches.js';
 
 const router = express.Router();
 
 function handleValidationErrors(req, res, next) {
-  const { validationResult } = require('express-validator');
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   next();
@@ -57,7 +56,8 @@ router.post(
       const entry = await Branches.addRole(req.params.branchName, req.body);
       res.status(201).json({ message: 'Role added', data: entry });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      console.error('Add role error:', err.message);
+      res.status(500).json({ error: err.message });
     }
   }
 );
@@ -71,6 +71,7 @@ router.put(
       const updated = await Branches.updateRole(req.params.branchName, req.params.entryId, req.body);
       res.json({ message: 'Role updated', data: updated });
     } catch (err) {
+      console.error('Update role error:', err.message);
       const status = err.message.includes('not found') ? 404 : 400;
       res.status(status).json({ error: err.message });
     }
@@ -82,6 +83,7 @@ router.delete('/:branchName/roles/:entryId', async (req, res) => {
     const removed = await Branches.deleteRole(req.params.branchName, req.params.entryId);
     res.json({ message: 'Role deleted', data: removed });
   } catch (err) {
+    console.error('Delete role error:', err.message);
     const status = err.message.includes('not found') ? 404 : 400;
     res.status(status).json({ error: err.message });
   }
