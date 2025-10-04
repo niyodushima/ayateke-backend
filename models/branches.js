@@ -129,15 +129,12 @@ const Branches = {
     if (!branch) throw new Error('Branch not found');
     if (!payload?.role || typeof payload.role !== 'string') throw new Error('Role is required');
 
-    const entry = {
-      id: uid(),
-      role: payload.role,
-      name: payload.name || ''
-    };
+    const existing = branch.roles.find((r) => r.role === payload.role);
+    if (!existing) throw new Error('Role not found in branch');
 
-    branch.roles.push(entry);
+    existing.name = payload.name || '';
     await db.write();
-    return entry;
+    return existing;
   },
 
   async updateRole(branchName, entryId, payload) {
