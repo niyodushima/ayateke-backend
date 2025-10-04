@@ -49,7 +49,13 @@ router.get('/:branchName/unassigned', async (req, res) => {
 
 router.post(
   '/:branchName/roles',
-  [body('role').isString(), body('name').optional().isString()],
+  [
+    body('role').isString(),
+    body('name').optional().isString(),
+    body('email').optional().isString(),
+    body('tel').optional().isString(),
+    body('address').optional().isString()
+  ],
   handleValidationErrors,
   async (req, res) => {
     try {
@@ -64,7 +70,13 @@ router.post(
 
 router.put(
   '/:branchName/roles/:entryId',
-  [body('role').optional().isString(), body('name').optional().isString()],
+  [
+    body('role').optional().isString(),
+    body('name').optional().isString(),
+    body('email').optional().isString(),
+    body('tel').optional().isString(),
+    body('address').optional().isString()
+  ],
   handleValidationErrors,
   async (req, res) => {
     try {
