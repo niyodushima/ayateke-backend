@@ -62,27 +62,40 @@ const Branches = {
   },
 
   async addRole(branchName, payload) {
-    const decoded = decodeURIComponent(branchName);
-    if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
+  const decoded = decodeURIComponent(branchName);
+  if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
 
-    await db.read();
-    ensureDbShape();
+  await db.read();
+  ensureDbShape();
 
-    const branch = db.data.branches.find((b) => b.branch === decoded);
-    if (!branch) throw new Error('Branch not found');
-    if (!payload?.role || typeof payload.role !== 'string') throw new Error('Role is required');
+  const branch = db.data.branches.find((b) => b.branch === decoded);
+  if (!branch) throw new Error('Branch not found');
+  if (!payload?.role || typeof payload.role !== 'string') throw new Error('Role is required');
 
-    const existing = branch.roles.find((r) => r.role === payload.role);
-    if (!existing) throw new Error('Role not found in branch');
+  let existing = branch.roles.find((r) => r.role === payload.role);
 
-    existing.name = payload.name || '';
-    existing.email = payload.email || '';
-    existing.tel = payload.tel || '';
-    existing.address = payload.address || '';
+  // ✅ If role doesn't exist, create it dynamically
+  if (!existing) {
+    existing = {
+      id: uid(),
+      role: payload.role,
+      name: '',
+      email: '',
+      tel: '',
+      address: ''
+    };
+    branch.roles.push(existing);
+  }
 
-    await db.write();
-    return existing;
-  },
+  // ✅ Assign staff info
+  existing.name = payload.name || '';
+  existing.email = payload.email || '';
+  existing.tel = payload.tel || '';
+  existing.address = payload.address || '';
+
+  await db.write();
+  return existing;
+}
 
   async updateRole(branchName, entryId, payload) {
     const decoded = decodeURIComponent(branchName);
