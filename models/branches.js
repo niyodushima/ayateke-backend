@@ -38,39 +38,95 @@ const Branches = {
     return db.data.branches;
   },
 
-  async seedStaffRoles() {
-    await db.read();
-    ensureDbShape();
+async seedStaffRoles() {
+  await db.read();
+  ensureDbShape();
 
-    const roles = [
+  const roleMap = {
+    'Head Office': [
       'Managing Director',
       'Permanent Secretary',
-      'Director of Finance',
-      'Logistician',
+      'Director of Finance and Administration',
+      'Logistician and Store Keeper',
       'Chief Accountant',
-      'Water Engineer',
-      'Pump Operator',
+      'Human Resource Officer',
+      'Internal Auditor',
+      'Tax Officer',
+      'IT Officer',
+      'Chief Driver',
+      'Accountant',
+      'Electromechanician',
+      'Assistant Chief Driver',
       'Driver',
-      'Technician',
-      'HR Manager'
-    ];
+      'Cleaner'
+    ],
+    'Kirehe Branch': [
+      'Branch Manager',
+      'Head of Technical Team',
+      'Chief Recovery Officer',
+      'Field Inspection Officer',
+      'Electromechanician',
+      'Accountant',
+      'Recovery Officer',
+      'Store Keeper and Cashier',
+      'Scheme Manager & Driver',
+      'Scheme Manager',
+      'Pump Operator',
+      'Plumber & Driver',
+      'Plumber',
+      'Plumber Assistant',
+      'Chlorine Mixer',
+      'Driver Vehicle',
+      'Driver Moto',
+      'Cleaner',
+      'Security Guard'
+    ],
+    'Gatsibo Branch': [
+      'Branch Manager',
+      'Head of Technical Team',
+      'Billing and Recovery Monitor',
+      'Scheme Manager & Driver',
+      'Scheme Manager',
+      'Plumber & Driver',
+      'Plumber',
+      'Pump Operator',
+      'Driver Vehicle',
+      'Driver Moto',
+      'Security Guard',
+      'Cleaner'
+    ],
+    'Mahama Water Treatment Plant': [
+      'Water Treatment Plant Manager',
+      'Water Supply Engineer',
+      'Accountant',
+      'Electromechanician',
+      'Water Quality Engineer',
+      'Electromechanic Engineer',
+      'Assistant Electromechanician',
+      'Pump Operator',
+      'Driver Vehicle',
+      'Laboratory Operator'
+    ]
+  };
 
-    for (const branch of db.data.branches) {
-      for (const role of roles) {
-        const exists = branch.staff.some((s) => s.role === role);
-        if (!exists) {
-          branch.staff.push({
-            id: uid(),
-            role,
-            name: ''
-          });
-        }
+  for (const branch of db.data.branches) {
+    const roles = roleMap[branch.branch] || [];
+    for (const role of roles) {
+      const exists = branch.staff.some((s) => s.role === role);
+      if (!exists) {
+        branch.staff.push({
+          id: uid(),
+          role,
+          name: ''
+        });
       }
     }
+  }
 
-    await db.write();
-    return db.data.branches;
-  },
+  await db.write();
+  return db.data.branches;
+}
+
 
   async list() {
     await db.read();
