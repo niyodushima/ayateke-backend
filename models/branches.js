@@ -16,10 +16,70 @@ function ensureDbShape() {
   db.data.branches ||= [];
 
   const roleMap = {
-    'Head Office': [/* roles */],
-    'Kirehe Branch': [/* roles */],
-    'Gatsibo Branch': [/* roles */],
-    'Mahama Water Treatment Plant': [/* roles */]
+    'Head Office': [
+      'Managing Director',
+      'Permanent Secretary',
+      'Director of Finance and Administration',
+      'Logistician and Store Keeper',
+      'Chief Accountant',
+      'Human Resource Officer',
+      'Internal Auditor',
+      'Tax Officer',
+      'IT Officer',
+      'Chief Driver',
+      'Accountant',
+      'Electromechanician',
+      'Assistant Chief Driver',
+      'Driver',
+      'Cleaner'
+    ],
+    'Kirehe Branch': [
+      'Branch Manager',
+      'Head of Technical Team',
+      'Chief Recovery Officer',
+      'Field Inspection Officer',
+      'Electromechanician',
+      'Accountant',
+      'Recovery Officer',
+      'Store Keeper and Cashier',
+      'Scheme Manager & Driver',
+      'Scheme Manager',
+      'Pump Operator',
+      'Plumber & Driver',
+      'Plumber',
+      'Plumber Assistant',
+      'Chlorine Mixer',
+      'Driver Vehicle',
+      'Driver Moto',
+      'Cleaner',
+      'Security Guard'
+    ],
+    'Gatsibo Branch': [
+      'Branch Manager',
+      'Head of Technical Team',
+      'Billing and Recovery Monitor',
+      'Scheme Manager & Driver',
+      'Scheme Manager',
+      'Plumber & Driver',
+      'Plumber',
+      'Pump Operator',
+      'Driver Vehicle',
+      'Driver Moto',
+      'Security Guard',
+      'Cleaner'
+    ],
+    'Mahama Water Treatment Plant': [
+      'Water Treatment Plant Manager',
+      'Water Supply Engineer',
+      'Accountant',
+      'Electromechanician',
+      'Water Quality Engineer',
+      'Electromechanic Engineer',
+      'Assistant Electromechanician',
+      'Pump Operator',
+      'Driver Vehicle',
+      'Laboratory Operator'
+    ]
   };
 
   for (const branchName of VALID_BRANCHES) {
