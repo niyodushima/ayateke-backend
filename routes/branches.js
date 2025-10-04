@@ -1,11 +1,8 @@
-// backend/routes/branches.js
 import express from 'express';
 import { body, param } from 'express-validator';
 import Branches from '../models/branches.js';
 
 const router = express.Router();
-
-const validTables = ['staff', 'schemeManagers', 'plumbers'];
 
 function handleValidationErrors(req, res, next) {
   const { validationResult } = require('express-validator');
@@ -14,7 +11,7 @@ function handleValidationErrors(req, res, next) {
   next();
 }
 
-// Init and optional seed endpoints (idempotent)
+// Init endpoint
 router.post('/init', async (_req, res) => {
   try {
     const data = await Branches.init();
@@ -22,16 +19,6 @@ router.post('/init', async (_req, res) => {
   } catch (err) {
     console.error('Init error:', err);
     res.status(500).json({ error: 'Failed to initialize branches' });
-  }
-});
-
-router.post('/seed-staff-roles', async (_req, res) => {
-  try {
-    const data = await Branches.seedStaffRoles();
-    res.json({ message: 'Staff roles seeded', data });
-  } catch (err) {
-    console.error('Seed roles error:', err);
-    res.status(500).json({ error: 'Failed to seed staff roles' });
   }
 });
 
@@ -46,7 +33,7 @@ router.get('/', async (_req, res) => {
   }
 });
 
-// GET a single branch
+// GET single branch
 router.get('/:branchName', async (req, res) => {
   try {
     const branch = await Branches.get(req.params.branchName);
@@ -58,66 +45,49 @@ router.get('/:branchName', async (req, res) => {
   }
 });
 
-// POST add entry to a table
+// POST add role
 router.post(
-  '/:branchName/:tableName',
-  [
-    param('tableName').custom((t) => validTables.includes(t)),
-    body('name').optional().isString(),
-    body('role').optional().isString(),
-  ],
+  '/:branchName/roles',
+  [body('role').isString(), body('name').optional().isString()],
   handleValidationErrors,
   async (req, res) => {
-    const { branchName, tableName } = req.params;
-    const { name, role } = req.body;
-
     try {
-      const entry = await Branches.addEntry(branchName, tableName, { name, role });
-      res.status(201).json({ message: 'Entry added', data: entry });
+      const entry = await Branches.addRole(req.params.branchName, req.body);
+      res.status(201).json({ message: 'Role added', data: entry });
     } catch (err) {
-      console.error('Add entry error:', err.message);
+      console.error('Add role error:', err.message);
       res.status(400).json({ error: err.message });
     }
   }
 );
 
-// PUT update entry in a table
+// PUT update role
 router.put(
-  '/:branchName/:tableName/:entryId',
-  [
-    param('tableName').custom((t) => validTables.includes(t)),
-    body('name').optional().isString(),
-    body('role').optional().isString(),
-  ],
+  '/:branchName/roles/:entryId',
+  [body('role').optional().isString(), body('name').optional().isString()],
   handleValidationErrors,
   async (req, res) => {
-    const { branchName, tableName, entryId } = req.params;
-    const { name, role } = req.body;
-
     try {
-      const updated = await Branches.updateEntry(branchName, tableName, entryId, { name, role });
-      res.json({ message: 'Entry updated', data: updated });
+      const updated = await Branches.updateRole(req.params.branchName, req.params.entryId, req.body);
+      res.json({ message: 'Role updated', data: updated });
     } catch (err) {
-      console.error('Update entry error:', err.message);
+      console.error('Update role error:', err.message);
       const status = err.message.includes('not found') ? 404 : 400;
       res.status(status).json({ error: err.message });
     }
   }
 );
 
-// DELETE entry in a table
+// DELETE role
 router.delete(
-  '/:branchName/:tableName/:entryId',
-  [param('tableName').custom((t) => validTables.includes(t))],
-  handleValidationErrors,
+  '/:branchName/roles/:entryId',
+  [],
   async (req, res) => {
-    const { branchName, tableName, entryId } = req.params;
-
     try {
-      const removed = await Branches.deleteEntry(branchName, tableName, entryId);
-      res.json({ message: 'Entry deleted', data: removed });
+      const removed = await Branches.deleteRole(req.params.branchName, req.params.entryId);
+      res.json({ message: 'Role deleted', data: removed });
     } catch (err) {
-      console.error('Delete entry error:', err.message);
+      console.error('Delete role error:', err.message);
       const status = err.message.includes('not found') ? 404 : 400;
       res.status(status).json({ error: err.message });
     }
