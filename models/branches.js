@@ -78,7 +78,18 @@ function ensureDbShape() {
       'Assistant Electromechanician',
       'Pump Operator',
       'Driver Vehicle',
-      'Laboratory Operator'
+      'Laboratory Operator',
+      'plumber',
+      'pump operator'
+    ],
+   'WATERAID PROJECT': [
+      'Site Engineer',
+      'Assistant Site Engineer',
+      'Pipe Welder Technician',
+      'Project Accountant',
+      'Driver Vehicle',
+      'Cashier & Store Keeper',
+      'Store Keeper & Pointeur'
     ]
   };
 
