@@ -4,7 +4,8 @@ const VALID_BRANCHES = [
   'Head Office',
   'Kirehe Branch',
   'Gatsibo Branch',
-  'Mahama Water Treatment Plant'
+  'Mahama Water Treatment Plant',
+  'WATERAID PROJECT'
 ];
 
 function uid() {
