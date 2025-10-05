@@ -17,81 +17,11 @@ function ensureDbShape() {
   db.data.branches ||= [];
 
   const roleMap = {
-    'Head Office': [
-      'Managing Director',
-      'Permanent Secretary',
-      'Director of Finance and Administration',
-      'Logistician and Store Keeper',
-      'Chief Accountant',
-      'Human Resource Officer',
-      'Internal Auditor',
-      'Tax Officer',
-      'IT Officer',
-      'Chief Driver',
-      'Accountant',
-      'Electromechanician',
-      'Assistant Chief Driver',
-      'Driver',
-      'Cleaner'
-    ],
-    'Kirehe Branch': [
-      'Branch Manager',
-      'Head of Technical Team',
-      'Chief Recovery Officer',
-      'Field Inspection Officer',
-      'Electromechanician',
-      'Accountant',
-      'Recovery Officer',
-      'Store Keeper and Cashier',
-      'Scheme Manager & Driver',
-      'Scheme Manager',
-      'Pump Operator',
-      'Plumber & Driver',
-      'Plumber',
-      'Plumber Assistant',
-      'Chlorine Mixer',
-      'Driver Vehicle',
-      'Driver Moto',
-      'Cleaner',
-      'Security Guard'
-    ],
-    'Gatsibo Branch': [
-      'Branch Manager',
-      'Head of Technical Team',
-      'Billing and Recovery Monitor',
-      'Scheme Manager & Driver',
-      'Scheme Manager',
-      'Plumber & Driver',
-      'Plumber',
-      'Pump Operator',
-      'Driver Vehicle',
-      'Driver Moto',
-      'Security Guard',
-      'Cleaner'
-    ],
-    'Mahama Water Treatment Plant': [
-      'Water Treatment Plant Manager',
-      'Water Supply Engineer',
-      'Accountant',
-      'Electromechanician',
-      'Water Quality Engineer',
-      'Electromechanic Engineer',
-      'Assistant Electromechanician',
-      'Pump Operator',
-      'Driver Vehicle',
-      'Laboratory Operator',
-      'Plumber',
-      'Pump Operator'
-    ],
-    'WATERAID PROJECT': [
-      'Site Engineer',
-      'Assistant Site Engineer',
-      'Pipe Welder Technician',
-      'Project Accountant',
-      'Driver Vehicle',
-      'Cashier & Store Keeper',
-      'Store Keeper & Pointeur'
-    ]
+    'Head Office': [/* roles */],
+    'Kirehe Branch': [/* roles */],
+    'Gatsibo Branch': [/* roles */],
+    'Mahama Water Treatment Plant': [/* roles */],
+    'WATERAID PROJECT': [/* roles */]
   };
 
   for (const branchName of VALID_BRANCHES) {
@@ -106,7 +36,8 @@ function ensureDbShape() {
           email: '',
           tel: '',
           address: '',
-          gender: ''
+          gender: '',
+          documents: [] // ✅ NEW
         }))
       });
     }
@@ -154,7 +85,8 @@ async function addRole(branchName, payload) {
       email: '',
       tel: '',
       address: '',
-      gender: ''
+      gender: '',
+      documents: [] // ✅ NEW
     };
     branch.roles.push(existing);
   }
@@ -224,6 +156,31 @@ async function getUnassignedRoles(branchName) {
   return branch.roles.filter((r) => !r.name || r.name.trim() === '');
 }
 
+async function addDocument(branchName, entryId, docMeta) {
+  const decoded = decodeURIComponent(branchName);
+  if (!VALID_BRANCHES.includes(decoded)) throw new Error('Invalid branch');
+
+  await db.read();
+  ensureDbShape();
+
+  const branch = db.data.branches.find((b) => b.branch === decoded);
+  if (!branch) throw new Error('Branch not found');
+
+  const role = branch.roles.find((r) => r.id === entryId);
+  if (!role) throw new Error('Role not found');
+
+  role.documents ||= [];
+  role.documents.push({
+    id: uid(),
+    name: docMeta.name || 'Untitled',
+    type: docMeta.type || 'Unknown',
+    uploadedAt: new Date().toISOString()
+  });
+
+  await db.write();
+  return role.documents;
+}
+
 const Branches = {
   init,
   list,
@@ -231,7 +188,8 @@ const Branches = {
   addRole,
   updateRole,
   deleteRole,
-  getUnassignedRoles
+  getUnassignedRoles,
+  addDocument // ✅ NEW
 };
 
 export default Branches;
