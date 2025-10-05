@@ -80,10 +80,10 @@ function ensureDbShape() {
       'Pump Operator',
       'Driver Vehicle',
       'Laboratory Operator',
-      'plumber',
-      'pump operator'
+      'Plumber',
+      'Pump Operator'
     ],
-   'WATERAID PROJECT': [
+    'WATERAID PROJECT': [
       'Site Engineer',
       'Assistant Site Engineer',
       'Pipe Welder Technician',
@@ -105,7 +105,8 @@ function ensureDbShape() {
           name: '',
           email: '',
           tel: '',
-          address: ''
+          address: '',
+          gender: ''
         }))
       });
     }
@@ -145,7 +146,6 @@ async function addRole(branchName, payload) {
 
   let existing = branch.roles.find((r) => r.role === payload.role);
 
-  // ✅ Create role dynamically if missing
   if (!existing) {
     existing = {
       id: uid(),
@@ -153,7 +153,8 @@ async function addRole(branchName, payload) {
       name: '',
       email: '',
       tel: '',
-      address: ''
+      address: '',
+      gender: ''
     };
     branch.roles.push(existing);
   }
@@ -162,6 +163,7 @@ async function addRole(branchName, payload) {
   existing.email = payload.email || '';
   existing.tel = payload.tel || '';
   existing.address = payload.address || '';
+  existing.gender = payload.gender || '';
 
   await db.write();
   return existing;
@@ -185,6 +187,7 @@ async function updateRole(branchName, entryId, payload) {
   if (payload?.email !== undefined) branch.roles[idx].email = payload.email;
   if (payload?.tel !== undefined) branch.roles[idx].tel = payload.tel;
   if (payload?.address !== undefined) branch.roles[idx].address = payload.address;
+  if (payload?.gender !== undefined) branch.roles[idx].gender = payload.gender;
 
   await db.write();
   return branch.roles[idx];
