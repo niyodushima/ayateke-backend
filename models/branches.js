@@ -17,11 +17,11 @@ function ensureDbShape() {
   db.data.branches ||= [];
 
   const roleMap = {
-    'Head Office': [/* roles */],
-    'Kirehe Branch': [/* roles */],
-    'Gatsibo Branch': [/* roles */],
-    'Mahama Water Treatment Plant': [/* roles */],
-    'WATERAID PROJECT': [/* roles */]
+    'Head Office': ['Managing Director', 'Permanent Secretary', 'Director of Finance and Administration', 'Logistician and Store Keeper', 'Chief Accountant', 'Human Resource Officer', 'Internal Auditor', 'Tax Officer', 'IT Officer', 'Chief Driver', 'Accountant', 'Electromechanician', 'Assistant Chief Driver', 'Driver', 'Cleaner'],
+    'Kirehe Branch': ['Branch Manager', 'Head of Technical Team', 'Chief Recovery Officer', 'Field Inspection Officer', 'Electromechanician', 'Accountant', 'Recovery Officer', 'Store Keeper & Cashier', 'Scheme Manager & Driver', 'Scheme Manager', 'Pump Operator', 'Plumber & Driver', 'Plumber', 'Plumber Assistant', 'Chroline Mixer', 'Driver Vehicle', 'Driver Moto', 'Cleaner', 'Security Guard'],
+    'Gatsibo Branch': ['Branch Manager', 'Head of Technical Team', 'Billing and Recovery Monitor', 'Scheme Manager & Driver', 'Scheme Manager', 'Plumber & Driver', 'Plumber', 'Pump Operater', 'Driver Vehicle', 'Driver Moto', 'Security Guard', 'Cleaner'],
+    'Mahama Water Treatment Plant': ['Water Treatment Plant Manager', 'Water Supply Engineer', 'Accountant', 'Electromechanician', 'Water Quality Engineer', 'Electro Mechanical Engineer', 'Assistant Electromechanician', 'Pump Operator', 'Driver Vehicle', 'Laboratory Operator', 'Plumber', 'Pump Operator'],
+    'WATERAID PROJECT': ['Site Engineer', 'Assistant Site Engineer', 'Pipe Welder Technician', 'Project Accountant', 'Driver Vehicle', 'Cashier & Store Keeper', 'Store keeper & Pointeur']
   };
 
   for (const branchName of VALID_BRANCHES) {
@@ -37,7 +37,7 @@ function ensureDbShape() {
           tel: '',
           address: '',
           gender: '',
-          documents: [] // ✅ NEW
+          documents: []
         }))
       });
     }
@@ -75,30 +75,20 @@ async function addRole(branchName, payload) {
   if (!branch) throw new Error('Branch not found');
   if (!payload?.role || typeof payload.role !== 'string') throw new Error('Role is required');
 
-  let existing = branch.roles.find((r) => r.role === payload.role);
+  const newEntry = {
+    id: uid(),
+    role: payload.role,
+    name: payload.name || '',
+    email: payload.email || '',
+    tel: payload.tel || '',
+    address: payload.address || '',
+    gender: payload.gender || '',
+    documents: []
+  };
 
-  if (!existing) {
-    existing = {
-      id: uid(),
-      role: payload.role,
-      name: '',
-      email: '',
-      tel: '',
-      address: '',
-      gender: '',
-      documents: [] // ✅ NEW
-    };
-    branch.roles.push(existing);
-  }
-
-  existing.name = payload.name || '';
-  existing.email = payload.email || '';
-  existing.tel = payload.tel || '';
-  existing.address = payload.address || '';
-  existing.gender = payload.gender || '';
-
+  branch.roles.push(newEntry);
   await db.write();
-  return existing;
+  return newEntry;
 }
 
 async function updateRole(branchName, entryId, payload) {
@@ -189,7 +179,7 @@ const Branches = {
   updateRole,
   deleteRole,
   getUnassignedRoles,
-  addDocument // ✅ NEW
+  addDocument
 };
 
 export default Branches;
