@@ -42,7 +42,7 @@ async function add(payload) {
     role: payload.role || '',
     branch: payload.branch || '',
     education: payload.education || '', // ✅ NEW FIELD
-    experience: payload.experience || '',
+    work_experience: payload.work_experience || '',
     documents: [] // ✅ Already supported
   };
 
@@ -66,7 +66,7 @@ async function update(id, payload) {
   if (payload?.role !== undefined) emp.role = payload.role;
   if (payload?.branch !== undefined) emp.branch = payload.branch;
   if (payload?.education !== undefined) emp.education = payload.education; // ✅ NEW FIELD
-  if (payload?.experience !== undefined) emp.experience = payload.experience;
+  if (payload?.work_experience !== undefined) emp.work_experience = payload.work_experience;
 
   await db.write();
   return emp;
