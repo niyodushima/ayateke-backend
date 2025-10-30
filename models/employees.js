@@ -41,9 +41,10 @@ async function add(payload) {
     gender: payload.gender || '',
     role: payload.role || '',
     branch: payload.branch || '',
-    education: payload.education || '', // ✅ NEW FIELD
+    education: payload.education || '',
     work_experience: payload.work_experience || '',
-    documents: [] // ✅ Already supported
+    field_of_study: payload.field_of_study || '', // ✅ NEW FIELD
+    documents: []
   };
 
   db.data.employees.push(newEntry);
@@ -65,8 +66,9 @@ async function update(id, payload) {
   if (payload?.gender !== undefined) emp.gender = payload.gender;
   if (payload?.role !== undefined) emp.role = payload.role;
   if (payload?.branch !== undefined) emp.branch = payload.branch;
-  if (payload?.education !== undefined) emp.education = payload.education; // ✅ NEW FIELD
+  if (payload?.education !== undefined) emp.education = payload.education;
   if (payload?.work_experience !== undefined) emp.work_experience = payload.work_experience;
+  if (payload?.field_of_study !== undefined) emp.field_of_study = payload.field_of_study;
 
   await db.write();
   return emp;
